@@ -11,6 +11,4 @@
 #include <avr/boot.h>
 #include <avr/wdt.h>
 
-
-
 #endif

@@ -3,11 +3,10 @@
 
 #include "stdint.h"
 #include "eeprom.h"
-#include "uart.h"
 
 #define MyID    Servo.Id
-#define AllID   0x00
-#define MainID   0x01
+#define MainID   25
+#define AllID   26
 
 typedef enum
 {
@@ -30,10 +29,11 @@ typedef struct __communication
 	uint8_t payload[50];
 } communication_t;
 
+void Com_Update(void);
 void handle_msg(communication_t *msg);
 void SendData(char *data);
 void ComCode(uint8_t senderid, uint8_t targetid, uint8_t msgid, uint8_t *packet, uint8_t length);
-void ComDecode(uint8_t c, communication_t *msg);
+uint8_t ComDecode(uint8_t c, communication_t *msg);
 void crc_init(uint16_t *crcAccum);
 void crc_accumulate(uint8_t data, uint16_t *crcAccum);
 

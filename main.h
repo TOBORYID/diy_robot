@@ -10,6 +10,7 @@
 #include "task.h"
 #include "uart.h"
 #include "inc.h"
+#include "communication.h"
 
 typedef struct self_para
 {

@@ -9,20 +9,24 @@ int main(void)
 	uart_init(9600);
 	Init_Task();
 	SysTime_Init();
+	Task_Init(0,  -1,  1,  Com_Update);
 	while(1)
 	{
 		Task_Running();
 	}
 }
+
+extern uint16_t ChanPosition;
+extern uint8_t ChanPower;
 uint16_t ADC_Value;
-uint16_t Input = 1000;
 float MotorOutput;
 
 void LOOP(void)
 {
 	ADC_Value = ADC_Read(0);
-	Servo_PID_Loop(Input, ADC_Value, &MotorOutput);
-	Pwm_Output(MotorOutput);
+	Servo_PID_Loop(ChanPosition, ADC_Value, &MotorOutput);
+	if(ChanPower) Pwm_Output(MotorOutput);
+	else Pwm_Output(0);
 }
 
 void Port_Init(void)

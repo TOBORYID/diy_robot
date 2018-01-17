@@ -15,8 +15,9 @@ extern parameter Servo;
 
 void Write_eeprom(uint16_t address, uint8_t data);
 uint8_t Read_eeprom(uint16_t address);
+void Init_Parameter(void);
+void Reset_Parameter(void);
 void Write_Parameter(uint8_t *data);
 void Read_Parameter(void);
-void Init_Parameter(void);
 
 #endif

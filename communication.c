@@ -1,7 +1,24 @@
 #include "communication.h"
+#include "servo.h"
+#include "uart.h"
 
+static uint8_t checkmsg = 0;
 
-void handle_msg(communication_t *msg)
+void Com_Update(void)
+{
+	static communication_t msg;
+	uint16_t nbytes = Get_Length();
+	for(uint16_t i = 0; i < nbytes; i++)
+	{
+		uint8_t c = Get_Byte();
+		if(ComDecode(c, &msg) == 1)
+		{
+			handle_msg(&msg);
+		}
+	}
+}
+
+void handle_msg(communication_t * msg)
 {
 	if(msg->TargetId == MyID)
 	{
@@ -48,16 +65,15 @@ void handle_msg(communication_t *msg)
 
 void SendData(char *data)
 {
-	ComCode(MyID,  MainID,  DebugData, (uint8_t *)data, strlen(data));
+	ComCode(MyID, MainID, DebugData, (uint8_t *)data, strlen(data));
 }
 
-
-void ComCode(uint8_t senderid, uint8_t targetid, uint8_t msgid, uint8_t *packet, uint8_t length)
+void ComCode(uint8_t senderid, uint8_t targetid, uint8_t msgid, uint8_t * packet, uint8_t length)
 {
 	uint8_t data[8 + length];
 	uint16_t crc16 = 0xffff;
 
-	data[0] = 0xfe;
+	data[0] = 0xfd;
 	data[1] = 0xfe;
 	data[2] = length;
 	crc_accumulate(data[2], &crc16);
@@ -72,13 +88,15 @@ void ComCode(uint8_t senderid, uint8_t targetid, uint8_t msgid, uint8_t *packet,
 		data[6 + i] = packet[i];
 		crc_accumulate(data[6 + i], &crc16);
 	}
+	crc_accumulate(0, &crc16);
 	data[6 + length] = crc16 & 0xFF;
 	data[7 + length] = crc16 >> 8;
 	Put_Str(data, 8 + length);
 }
 
-void ComDecode(uint8_t c, communication_t *msg)
+uint8_t ComDecode(uint8_t c, communication_t * msg)
 {
+	checkmsg = 0;
 	switch(msg->parse_state)
 	{
 		case 0:
@@ -91,12 +109,12 @@ void ComDecode(uint8_t c, communication_t *msg)
 			if(c == 0xfe)
 			{
 				msg->packet_idx = 0;
-				msg->parse_state = 1;
+				msg->parse_state = 2;
 				crc_init(&msg->checksum);
 			}
 			else
 			{
-				msg->parse_state = 2;
+				msg->parse_state = 0;
 			}
 			break;
 		case 2:
@@ -148,18 +166,20 @@ void ComDecode(uint8_t c, communication_t *msg)
 		case 8:
 			if(c == (msg->checksum >> 8))
 			{
+				checkmsg = 1;
 			}
 			msg->parse_state = 0;
 			break;
 	}
+	return checkmsg;
 }
 
-void crc_init(uint16_t *crcAccum)
+void crc_init(uint16_t * crcAccum)
 {
 	*crcAccum = 0XFFFF;
 }
 
-void crc_accumulate(uint8_t data, uint16_t *crcAccum)
+void crc_accumulate(uint8_t data, uint16_t * crcAccum)
 {
 	uint8_t tmp;
 	tmp = data ^ (uint8_t)(*crcAccum & 0xff);

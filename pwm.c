@@ -6,6 +6,9 @@ void Pwm_Output(float pulse)
 	if(pulse > 0)
 	{
 	}
+	else	if(pulse < 0)
+	{
+	}
 	else
 	{
 	}

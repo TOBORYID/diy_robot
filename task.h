@@ -19,7 +19,7 @@ typedef struct
 void Init_Task(void);
 void Task_Init(uint8_t id, uint16_t time, uint16_t period, Task_Function task);
 void Task_DeInit(uint8_t id);
-void runtasks(void);
-void TaskCount(void);
+void Task_Running(void);
+void Task_Cnt(void);
 
 #endif
